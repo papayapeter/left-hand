@@ -15,6 +15,8 @@ const int Switch = 16;
 const int LED = 13;
 
 // Konstanten (zu ändern)
+const bool Reverse = false;           // ist öffnen und schließen verdreht?
+
 const int TouchThreshhold = 200;      // Wie fein reagiert die Hand auf Berührung?
 const int MotorMin = 0;               // An welcher Stelle steht der Motor, wenn die Hand voll auf ist?
 const int MotorMax = 180;             // An welcher Stelle steht der Motor, wenn die Hand voll zu ist?
@@ -72,7 +74,7 @@ void setup()
 {
   // Pins und Kommunikation aufbauen
   Serial.begin(9600);
-  
+
   pinMode(Microstep, OUTPUT);
   pinMode(Enable, OUTPUT);
   pinMode(LED, OUTPUT);
@@ -148,7 +150,7 @@ void loop()
 
     Motor.setAcceleration(2000);
     Motor.setMaxSpeed(20);
-  
+
     Motor.moveTo(MotorFailsafe);
     while(digitalRead(Switch))
     {
@@ -165,16 +167,16 @@ void loop()
       }
     }
     Motor.setCurrentPosition(MotorLimit);
-  
+
     while(Motor.currentPosition() > 0)
     {
       Motor.runToNewPosition(0);
     }
-    
+
     LastTouched = millis();
     MotorTarget = -1;
   }
-  
+
   if (TimerRead.check())
   {
     // Auslesen
@@ -203,35 +205,67 @@ void loop()
     }
     TouchAverage /= TouchLength;
 
-    
+
 
     // Feststellen ob der die Hand greifen oder loslassen soll
     // Hand loslassen lassen
-    if (TouchAverage < TouchCalibration - TouchThreshhold) // oder: (TouchAverage < TouchCalibration - TouchThreshhold)
+    if (!reverse)
     {
-      LastTouched = millis();
-      if (Motor.currentPosition() >= MotorMax - 10)
+      if (TouchAverage < TouchCalibration - TouchThreshhold)
       {
-        digitalWrite(LED, LOW);
-        MotorTarget = 0;
-        RemainNow = millis();
+        LastTouched = millis();
+        if (Motor.currentPosition() >= MotorMax - 10)
+        {
+          digitalWrite(LED, LOW);
+          MotorTarget = 0;
+          RemainNow = millis();
+        }
+        else
+        {
+          digitalWrite(LED, LOW);
+          MotorTarget = -1;
+        }
       }
-      else
+      // Hand greifen lassen
+      else if (TouchAverage > TouchCalibration + TouchThreshhold)
       {
-        digitalWrite(LED, LOW);
+        digitalWrite(LED, HIGH);
+        MotorTarget = 1;
+      }
+      // Hand verharren lassen
+      else if (millis() > RemainNow + RemainTime && MotorTarget == 0)
+      {
         MotorTarget = -1;
       }
     }
-    // Hand greifen lassen
-    else if (TouchAverage > TouchCalibration + TouchThreshhold) // oder: (TouchAverage > TouchCalibration + TouchThreshhold)
+    else
     {
-      digitalWrite(LED, HIGH);
-      MotorTarget = 1;
-    }
-    // Hand verharren lassen
-    else if (millis() > RemainNow + RemainTime && MotorTarget == 0)
-    {
-      MotorTarget = -1;
+      if (TouchAverage > TouchCalibration + TouchThreshhold)
+      {
+        LastTouched = millis();
+        if (Motor.currentPosition() >= MotorMax - 10)
+        {
+          digitalWrite(LED, LOW);
+          MotorTarget = 0;
+          RemainNow = millis();
+        }
+        else
+        {
+          digitalWrite(LED, LOW);
+          MotorTarget = -1;
+        }
+      }
+      // Hand greifen lassen
+      else if (TouchAverage < TouchCalibration - TouchThreshhold)
+      {
+        digitalWrite(LED, HIGH);
+        MotorTarget = 1;
+      }
+      // Hand verharren lassen
+      else if (millis() > RemainNow + RemainTime && MotorTarget == 0)
+      {
+        MotorTarget = -1;
+      }
     }
 
     // Komm her Richtung ändern
@@ -246,7 +280,7 @@ void loop()
     {
       Motor.setAcceleration(MotorAccelerationBack);
       Motor.setMaxSpeed(MotorMaxSpeedBack);
-      
+
       if (ComeMotorTarget == 1)
       {
         Motor.moveTo(min(ComeMotorMax, interpolate(ComeMotorMin, ComeMotorMax + 30, float(millis() - ComeNow) / float(ComeTime))));
@@ -260,10 +294,10 @@ void loop()
     {
       Motor.setAcceleration(MotorAcceleration);
       Motor.setMaxSpeed(MotorMaxSpeed);
-    
+
       Motor.moveTo(MotorMax + interpolate(LastWiggle, CurrentWiggle, float(millis() - WiggleNow) / float(WiggleTime)));
     }
-    
+
     // Serielle Aufzeichnung
     if (TimerPrint.check())
     {
@@ -285,7 +319,7 @@ void loop()
   }
 
   Motor.run();
-  
+
   if (!digitalRead(Switch))
   {
     Motor.setCurrentPosition(185);
