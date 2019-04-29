@@ -209,7 +209,7 @@ void loop()
 
     // Feststellen ob der die Hand greifen oder loslassen soll
     // Hand loslassen lassen
-    if (!reverse)
+    if (!Reverse)
     {
       if (TouchAverage < TouchCalibration - TouchThreshhold)
       {
