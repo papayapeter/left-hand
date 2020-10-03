@@ -99,10 +99,10 @@ public:
    @param time        time between reads in milliseconds
   */
   void setTouch(uint16_t threshhold,
-                uint8_t lengthT,
-                uint8_t lengthC,
-                uint8_t lengthP,
-                uint8_t time);
+                uint16_t lengthC,
+                uint16_t lengthP,
+                uint16_t lengthT,
+                uint8_t intervalTime);
 };
 
 #endif

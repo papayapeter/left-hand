@@ -17,9 +17,9 @@ void Hand::setMotor(uint16_t failsafe,
 }
 
 void Hand::setTouch(uint16_t threshhold,
-                    uint8_t lengthT,
-                    uint8_t lengthC,
-                    uint8_t lengthP,
+                    uint16_t lengthC,
+                    uint16_t lengthP,
+                    uint16_t lengthT,
                     uint8_t time)
 {
   touchThreshhold = threshhold;
@@ -27,6 +27,10 @@ void Hand::setTouch(uint16_t threshhold,
 
   calibrationLength = lengthC;
   pauseLength = lengthP;
+
+  touchStack = new uint16_t[lengthC + lengthP + lengthT];
+  touchCalibration = 0;
+  touchAverage = 0;
 
   timerRead.interval(time);
   timerRead.reset();

@@ -3,43 +3,37 @@
 
 #include "hand.h"
 
-// Pins
-const int MICROSTEP = 7;
-const int ENABLE = 8;
-const int STEP = 9;
-const int DIRECTION = 10;
-const int SEED = 14;
-const int TOUCH = 15;
-const int SWITCH = 16;
-const int LED = 13;
+// pins
+const uint8_t MICROSTEP = 7;
+const uint8_t ENABLE = 8;
+const uint8_t STEP = 9;
+const uint8_t DIRECTION = 10;
+const uint8_t SEED = 14;
+const uint8_t TOUCH = 15;
+const uint8_t SWITCH = 16;
+const uint8_t LED = 13;
 
 // constants
-const int TouchThreshhold = 200;      // Wie fein reagiert die Hand auf Berührung?
-const int MotorLimit = 185;           // Das harte Maximum
-const int MotorFailsafe = 350;        // Wann schaltet sich das gerät ab?
-const int MotorAcceleration = 50;     // Wie schnell Beschleunigt der Motor, wenn die Hand zu geht?
-const int MotorMaxSpeed = 50;         // Wie schnell ist der Motor maximal, wenn die Hand zu geht?
-const int MotorAccelerationBack = 25; // Wie schnell Beschleunigt der Motor, wenn die Hand auf geht?
-const int MotorMaxSpeedBack = 25;     // Wie schnell ist der Motor maximal, wenn die Hand auf geht?
+const uint16_t motorFailsafe = 350;         // when to stop moving during calibration
+const uint16_t motorLimit= 185;            // what should be the calibrated position
+const uint16_t motorAcceleration = 50;     // how fast does the motor accelerate during closing?
+const uint16_t motorMaxSpeed = 50;         // how fast will the motor go during closing?
+const uint16_t motorAccelerationBack = 25; // how fast does the motor accelerate during opening?
+const uint16_t motorMaxSpeedBack = 25;     // how fast will the motor go during opening?
+//const uint16_t motorMaxCome = 40;          // full closed position if the "come here" gesture?
+//const uint16_t comeTime = 4000;              // duration of the "come here" gesture?
 
-const int TouchLength = 20;           // Wie viele Intervalle werden für die Berührung gelesen?
-const int CalibrationLength = 80;     // Wie viele Intervalle werden für die Kalibrierung gelesen?
-const int PauseLength = 500;          // Wie viele Intervalle sind zwischen Berührung und Kalibrierung
-
-const int WiggleTime = 200;           // Intervall für das Zucken
-const int WiggleMagnitude = 3;        // Stärke des Zuckens
-const int RemainTime = 500;           // Wie lange verharrt die Hand geschlossen?
-
-const int ComeMotorMin = 0;           // Voll auf Stellung der Komm her Bewegung
-const int ComeMotorMax = 40;          // Voll zu Stellung der Komm her Bewegung //***1: 50 2: 40 3: 60
-const int ComeTime = 4000;            // Dauer der Komm her Bewegung
+const uint16_t touchThreshhold = 200;       // how sensitive is the hand towards touch?
+const uint16_t  calibrationLength = 80;     // how many intervals to read for calibration?
+const uint16_t  pauseLength = 500;           // how many intervals between touch and calibration?
+const uint16_t  touchLength = 20;           // how many intervals to read for touch?
 
 // objects
 Hand hand(MICROSTEP, ENABLE, STEP, DIRECTION, SEED, TOUCH, SWITCH, LED);
 
 void setup() {
-  // put your setup code here, to run once:
-
+  hand.setMotor(motorFailsafe, motorLimit, motorAcceleration, motorMaxSpeed, motorAccelerationBack, motorMaxSpeedBack);
+  hand.setTouch(touchThreshhold, calibrationLength, pauseLength, touchLength, 1);
 }
 
 void loop() {
