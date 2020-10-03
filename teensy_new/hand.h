@@ -2,6 +2,7 @@
 #define HAND_H
 
 // libraries -------------------------------------------------------------------
+#include <Metro.h>
 #include <AccelStepper.h>
 
 // class -----------------------------------------------------------------------
@@ -35,7 +36,9 @@ private:
   uint8_t  pauseLength;           // how many intervals between touch and calibration?
 
   // objects
-  AccelStepper Motor;
+  AccelStepper motor;
+  Metro        timerRead;
+
   // variables to be changed during operation
   boolean reverse;                // is opening and closing reversed?
 
@@ -66,7 +69,8 @@ public:
        pinTouch(touch),
        pinSwitch(momSwitch),
        pinLed(led),
-       Motor(AccelStepper::DRIVER, step, direction) { }
+       motor(AccelStepper::DRIVER, step, direction),
+       timerRead(1) { }
 
  /**
   @brief   sets motor parameters
@@ -92,11 +96,13 @@ public:
    @param lengthT     (length touch) how many intervals to read for touch?
    @param lengthC     (length calibration) how many intervals to read for calibration?
    @param lengthP     (length pause) how many intervals between touch and calibration?
+   @param time        time between reads in milliseconds
   */
   void setTouch(uint16_t threshhold,
                 uint8_t lengthT,
                 uint8_t lengthC,
-                uint8_t lengthP);
+                uint8_t lengthP,
+                uint8_t time);
 };
 
 #endif
