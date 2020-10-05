@@ -8,11 +8,18 @@
 // enums
 enum HandState
 {
-  OPEN = 0,
-  OPENING = 1,
-  CLOSED = 2,
-  CLOSING = 3,
-  REMAINING = 4
+  OPEN,
+  OPENING,
+  CLOSED,
+  CLOSING,
+  REMAINING
+};
+
+enum Direction
+{
+  REVERSE,
+  UNSET,
+  NORMAL
 };
 
 // class -----------------------------------------------------------------------
@@ -30,33 +37,39 @@ private:
   const uint8_t pinLed;
 
   // constants to be set before operation
-  uint16_t motorFailsafe;         // when to stop moving during calibration
-  uint16_t motorLimit;            // what should be the calibrated position
-  uint16_t motorAcceleration;     // how fast does the motor accelerate during closing?
-  uint16_t motorMaxSpeed;         // how fast will the motor go during closing?
-  uint16_t motorAccelerationBack; // how fast does the motor accelerate during opening?
-  uint16_t motorMaxSpeedBack;     // how fast will the motor go during opening?
-  //uint16_t motorMaxCome;          // full closed position if the "come here" gesture?
-  //uint16_t comeTime;              // duration of the "come here" gesture?
+  uint16_t motorFailsafe;                // when to stop moving during calibration
+  uint16_t motorLimit;                   // what should be the calibrated position
+  uint16_t motorMax;                     // what should be the maximum position (always less than the calibrated position)
+  uint16_t motorAcceleration;            // how fast does the motor accelerate during closing?
+  uint16_t motorMaxSpeed;                // how fast will the motor go during closing?
+  uint16_t motorAccelerationBack;        // how fast does the motor accelerate during opening?
+  uint16_t motorMaxSpeedBack;            // how fast will the motor go during opening?
+  uint16_t motorRemainOverstep;          // how many steps will the motor do after the audience let go?
+  uint16_t motorAccelerationCalibration; // how fast does the motor accelerate during closing?
+  uint16_t motorMaxSpeedCalibration;     // how fast will the motor go during closing?
+  //uint16_t motorMaxCome;                 // full closed position if the "come here" gesture?
+  //uint16_t comeTime;                     // duration of the "come here" gesture?
 
-  uint16_t touchThreshhold;       // how sensitive is the hand towards touch?
-  uint8_t  touchLength;           // how many intervals to read for touch?
+  uint16_t touchThreshhold;              // how sensitive is the hand towards touch?
+  uint16_t touchLength;                  // how many intervals to read for touch?
 
-  uint8_t  calibrationLength;     // how many intervals to read for calibration?
-  uint8_t  pauseLength;           // how many intervals between touch and calibration?
+  uint16_t calibrationLength;            // how many intervals to read for calibration?
+  uint16_t pauseLength;                  // how many intervals between touch and calibration?
+
+  boolean  debugging;                    // serial readout enabled?
 
   // objects
   AccelStepper motor;
   Metro        timerRead;
+  Metro        timerDebug;
 
   // variables to be changed during operation
-  int8_t reverse;                 // is opening and closing reversed?
-  HandState handState;
+  Direction direction;                   // is opening and closing reversed?
+  HandState handState;                   // state the hand is in (open/.../closing/...)
 
   // working variables
-  uint16_t touchCalibration;
-  uint16_t touchAverage;
   uint16_t* touchStack;
+  boolean   reading;
 
 public:
   /**
@@ -81,7 +94,8 @@ public:
        pinSwitch(momSwitch),
        pinLed(led),
        motor(AccelStepper::DRIVER, step, direction),
-       timerRead(1) { }
+       timerRead(1),
+       timerDebug(100) { }
 
  /**
   @brief  sets motor parameters
@@ -97,10 +111,14 @@ public:
  */
   void setMotor(uint16_t failsafe,
                 uint16_t limit,
+                uint16_t max,
                 uint16_t acceleration,
                 uint16_t speed,
                 uint16_t accelerationBack,
-                uint16_t speedBack);
+                uint16_t speedBack,
+                uint16_t remainOverstep,
+                uint16_t accelerationCalibration,
+                uint16_t speedCalibration);
 
   /**
    @brief  sets touch parameters
@@ -126,7 +144,9 @@ public:
 
    @param duration  for how long to fill/initialize
   */
-  void initialize(uint16_t duration);
+  void initialize(uint32_t duration,
+                  boolean debug = false,
+                  uint16_t debugTime = 100);
 
   /**
    @brief  calibrates the hardware with the help of the momentary switch
@@ -147,16 +167,23 @@ public:
   /**
    @brief  closes the hand
 
-   @call   call every loop while closing
+   @call   call once to start closing
   */
   void close();
 
   /**
    @brief  opens the hand
 
-   @call   call every loop while opening
+   @call   call once to start opening
   */
   void open();
+
+  /**
+   @brief  halts the movement
+
+   @call   call once to halt
+  */
+  void stop();
 
   /**
    @brief  moves the hand slighty in a "come here" sort of way when open
