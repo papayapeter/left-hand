@@ -5,6 +5,16 @@
 #include <Metro.h>
 #include <AccelStepper.h>
 
+// enums
+enum HandState
+{
+  OPEN = 0,
+  OPENING = 1,
+  CLOSED = 2,
+  CLOSING = 3,
+  REMAINING = 4
+};
+
 // class -----------------------------------------------------------------------
 class Hand
 {
@@ -40,7 +50,8 @@ private:
   Metro        timerRead;
 
   // variables to be changed during operation
-  boolean reverse;                // is opening and closing reversed?
+  int8_t reverse;                 // is opening and closing reversed?
+  HandState handState;
 
   // working variables
   uint16_t touchCalibration;
@@ -73,7 +84,9 @@ public:
        timerRead(1) { }
 
  /**
-  @brief   sets motor parameters
+  @brief  sets motor parameters
+
+  @call   call once at the beginning
 
   @param failsafe         when to stop moving during calibration
   @param limit            what should be the calibrated position
@@ -90,7 +103,9 @@ public:
                 uint16_t speedBack);
 
   /**
-   @brief   sets touch parameters
+   @brief  sets touch parameters
+
+   @call   call once at the beginning
 
    @param threshhold  how sensitive is the hand towards touch?
    @param lengthT     (length touch) how many intervals to read for touch?
@@ -102,7 +117,60 @@ public:
                 uint16_t lengthC,
                 uint16_t lengthP,
                 uint16_t lengthT,
-                uint8_t intervalTime);
+                uint8_t intervalTime = 1);
+
+  /**
+   @brief  initializes the readings (fills the touch value array/touch stack)
+
+   @call   call once at the beginning
+
+   @param duration  for how long to fill/initialize
+  */
+  void initialize(uint16_t duration);
+
+  /**
+   @brief  calibrates the hardware with the help of the momentary switch
+
+   @call   call once for every calibration
+  */
+  void calibrate();
+
+  /**
+   @brief  reads for touch at the pre set intervals
+
+   @call   call every loop
+
+   @param state   reference to a variable which will be set to the state (open/closed/...)
+  */
+  bool feel(HandState& state);
+
+  /**
+   @brief  closes the hand
+
+   @call   call every loop while closing
+  */
+  void close();
+
+  /**
+   @brief  opens the hand
+
+   @call   call every loop while opening
+  */
+  void open();
+
+  /**
+   @brief  moves the hand slighty in a "come here" sort of way when open
+
+   @call   every loop while open
+  */
+  void comeHere();
+
+  /**
+   @brief   wiggles the hand when its closed
+
+   @call   every loop while closed fully
+  */
+  void wiggle();
 };
 
 #endif

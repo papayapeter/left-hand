@@ -20,7 +20,7 @@ void Hand::setTouch(uint16_t threshhold,
                     uint16_t lengthC,
                     uint16_t lengthP,
                     uint16_t lengthT,
-                    uint8_t time)
+                    uint8_t intervalTime)
 {
   touchThreshhold = threshhold;
   touchLength = lengthT;
@@ -32,6 +32,42 @@ void Hand::setTouch(uint16_t threshhold,
   touchCalibration = 0;
   touchAverage = 0;
 
-  timerRead.interval(time);
+  timerRead.interval(intervalTime);
   timerRead.reset();
+}
+
+void Hand::initialize(uint16_t duration)
+{
+  reverse = 0;
+  handState = OPEN;
+}
+
+void Hand::calibrate()
+{
+
+}
+
+bool Hand::feel(HandState& state)
+{
+  return false;
+}
+
+void Hand::close()
+{
+
+}
+
+void Hand::open()
+{
+
+}
+
+void Hand::comeHere()
+{
+
+}
+
+void Hand::wiggle()
+{
+
 }
