@@ -62,8 +62,7 @@ void Hand::setTouch(uint16_t threshhold,
 }
 
 // initialize ------------------------------------------------------------------
-void Hand::initialize(uint32_t duration,
-                      boolean debug,
+void Hand::initialize(boolean debug,
                       boolean plot,
                       uint16_t debugTime)
 {
@@ -85,13 +84,22 @@ void Hand::initialize(uint32_t duration,
   if (debugging)
     Serial.begin(9600);
 
+  // set up pins
+  pinMode(pinSwitch, INPUT_PULLUP);
+  pinMode(pinLed, OUTPUT);
+}
+
+// fill ------------------------------------------------------------------------
+void Hand::fill(uint32_t duration)
+{
   if (debugging && !plotting)
     Serial.println("filling touchStack for " + String(duration) + " ms");
 
-  // set up pins and turn on led
-  pinMode(pinSwitch, INPUT_PULLUP);
-  pinMode(pinLed, OUTPUT);
+  // turn on led
   digitalWrite(pinLed, HIGH);
+
+  // run the motor back to 0
+  motor.moveTo(0);
 
   // fill the touchstack for the set duration
   uint32_t time = millis();
@@ -99,21 +107,24 @@ void Hand::initialize(uint32_t duration,
   {
     if (timerRead.check())
     {
+      // read the touch
+      uint16_t value = touchRead(pinTouch);
       // shift every read down
       for (uint16_t i = 0; i < calibrationLength + pauseLength + touchLength - 1; i++)
-      {
         touchStack[i] = touchStack[i + 1];
-      }
       // put new read on top
-      touchStack[calibrationLength + pauseLength + touchLength - 1] = touchRead(pinTouch);
+      touchStack[calibrationLength + pauseLength + touchLength - 1] = value;
     }
+
+    // run motor
+    motor.run();
   }
 
   // turn off led
   digitalWrite(pinLed, LOW);
 
   // debug
-  if (debugging && !plot)
+  if (debugging && !plotting)
     Serial.println("touchStack filled");
 }
 

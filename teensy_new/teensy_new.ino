@@ -73,9 +73,11 @@ void setup()
                 pauseLength,
                 touchLength);
 
-  hand.initialize(5000, true, true, 100);
+  hand.initialize(true, true, 100);
 
   hand.calibrate();
+
+  hand.fill(5000);
 
   timeToCalibration = 90000 + random(30000);
 }

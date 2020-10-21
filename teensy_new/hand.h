@@ -231,17 +231,26 @@ public:
                 uint8_t intervalTime = 1);
 
   /**
+   @brief  initializes the states and debugging
+
+   @call   call once at the beginning
+
+   @param debug     export debug readings
+   @param plot      export plot data instead of state data
+   @param debugTime at which interval to export plot data
+  */
+  void initialize(boolean debug = false,
+                  boolean plot = false,
+                  uint16_t debugTime = 100);
+
+  /**
    @brief  initializes the readings (fills the touch value array/touch stack)
 
    @call   call once at the beginning
 
    @param duration  for how long to fill/initialize
   */
-  void initialize(uint32_t duration,
-                  boolean debug = false,
-                  boolean plot = false,
-                  uint16_t debugTime = 100);
-
+  void fill(uint32_t duration);
   /**
    @brief  calibrates the hardware with the help of the momentary switch
 
