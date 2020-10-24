@@ -77,9 +77,6 @@ void Hand::initialize(boolean debug,
   debugging = debug;
   plotting = plot;
 
-  // set random seed from floating pin
-  randomSeed(analogRead(pinSeed));
-
   // debug
   if (debugging)
     Serial.begin(9600);

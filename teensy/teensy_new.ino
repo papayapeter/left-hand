@@ -41,7 +41,7 @@ const uint16_t pauseLength = 500;                   // how many intervals betwee
 const uint16_t touchLength = 20;                    // how many intervals to read for touch?
 
 // objects ---------------------------------------------------------------------
-Hand hand(MICROSTEP, ENABLE, STEP, DIRECTION, SEED, TOUCH, SWITCH, LED);
+Hand hand(MICROSTEP, ENABLE, STEP, DIRECTION, TOUCH, SWITCH, LED);
 
 // variables -------------------------------------------------------------------
 HandState state = OPENING;
@@ -51,6 +51,9 @@ uint32_t timeToCalibration;
 // setup -----------------------------------------------------------------------
 void setup()
 {
+  // set random seed from floating pin
+  randomSeed(analogRead(SEED));
+
   hand.setMotor(motorFailsafe,
                 motorLimit,
                 motorMax,
@@ -79,7 +82,7 @@ void setup()
 
   hand.fill(5000);
 
-  timeToCalibration = 90000 + random(30000);
+  timeToCalibration = 120000 + random(60000);
 }
 
 // loop ------------------------------------------------------------------------
@@ -98,7 +101,7 @@ void loop()
 
   if (millis() > hand.getLastTouched() + timeToCalibration)
   {
-    timeToCalibration = 90000 + random(30000);
+    timeToCalibration = 120000 + random(60000);
 
     hand.calibrate();
   }

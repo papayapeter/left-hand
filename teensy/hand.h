@@ -29,7 +29,6 @@ private:
   const uint8_t pinEnable;
   const uint8_t pinStep;
   const uint8_t pinDirection;
-  const uint8_t pinSeed;
   const uint8_t pinTouch;
   const uint8_t pinSwitch;
   const uint8_t pinLed;
@@ -158,7 +157,6 @@ public:
        uint8_t enable,
        uint8_t step,
        uint8_t direction,
-       uint8_t seed,
        uint8_t touch,
        uint8_t momSwitch,
        uint8_t led) :
@@ -166,7 +164,6 @@ public:
        pinEnable(enable),
        pinStep(step),
        pinDirection(direction),
-       pinSeed(seed),
        pinTouch(touch),
        pinSwitch(momSwitch),
        pinLed(led),
