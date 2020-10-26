@@ -40,6 +40,8 @@ const uint16_t calibrationLength = 80;              // how many intervals to rea
 const uint16_t pauseLength = 500;                   // how many intervals between touch and calibration?
 const uint16_t touchLength = 20;                    // how many intervals to read for touch?
 
+const uint32_t touchOpen = 60000;                   // when to open the hand after it's last been closed
+
 // objects ---------------------------------------------------------------------
 Hand hand(MICROSTEP, ENABLE, STEP, DIRECTION, TOUCH, SWITCH, LED);
 
@@ -48,12 +50,15 @@ HandState state = OPENING;
 
 uint32_t timeToCalibration;
 
+uint32_t closeTime;
+
 // setup -----------------------------------------------------------------------
 void setup()
 {
   // set random seed from floating pin
   randomSeed(analogRead(SEED));
 
+  // set motor parameters
   hand.setMotor(motorFailsafe,
                 motorLimit,
                 motorMax,
@@ -71,27 +76,38 @@ void setup()
                 motorWiggleTime,
                 motorWiggleMagnitude);
 
+  // set touch parameters
   hand.setTouch(touchThreshhold,
                 calibrationLength,
                 pauseLength,
                 touchLength);
 
+  // set debug parameters and set states
   hand.initialize(true, true, 100);
 
+  // calibrate mechanically
   hand.calibrate();
 
+  // calibrate electrically
   hand.fill(5000);
 
+  // set the first time when to calibrate again after nobody touched the hand
   timeToCalibration = 120000 + random(60000);
 }
 
 // loop ------------------------------------------------------------------------
 void loop()
 {
+  // sense for touch and set the proper states
   if (hand.feel())
   {
     if (state == OPENING)
+    {
       hand.close();
+
+      // remember when the hand was last closed
+      closeTime = millis();
+    }
   }
   else
   {
@@ -99,12 +115,22 @@ void loop()
       hand.open();
   }
 
+  // if the hand was last closed before the touchOpen time, then make it open
+  if (millis() > closeTime + touchOpen)
+  {
+    hand.setReading(false);
+  }
+
+  // if the time to calibrate after the last touch has elapsed, then calibrate
   if (millis() > hand.getLastTouched() + timeToCalibration)
   {
     timeToCalibration = 120000 + random(60000);
 
     hand.calibrate();
+
+    hand.fill(3000);
   }
 
+  // run the hand
   state = hand.run();
 }

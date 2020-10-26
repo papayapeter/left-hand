@@ -76,6 +76,7 @@ private:
   uint16_t remainPos;
 
   uint32_t lastTouched;
+  boolean reading;
 
   // private methods
   uint16_t interpolate(uint16_t a, uint16_t b, float ratio)
@@ -169,7 +170,8 @@ public:
        pinLed(led),
        motor(AccelStepper::DRIVER, step, direction),
        timerRead(1),
-       timerDebug(1) { }
+       timerDebug(1),
+       reading(false) { }
 
  /**
   @brief  sets motor parameters
@@ -254,6 +256,15 @@ public:
    @call   call once for every calibration
   */
   void calibrate();
+
+  /**
+   @brief  sets the read state
+
+   @call   call everytime the reading is to be changed
+
+   @param   readState the state the reading is to be set to
+  */
+  void setReading(boolean readState);
 
   /**
    @brief  reads for touch at the pre set intervals

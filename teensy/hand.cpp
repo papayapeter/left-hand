@@ -179,11 +179,15 @@ void Hand::calibrate()
     Serial.println("calibration done");
 }
 
+// setReading ------------------------------------------------------------------
+void Hand::setReading(boolean readState)
+{
+  reading = readState;
+}
+
 // feel ------------------------------------------------------------------------
 bool Hand::feel()
 {
-  static boolean reading = false;
-
   // if it's time to read
   if (timerRead.check())
   {
