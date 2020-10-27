@@ -35,7 +35,7 @@ const uint16_t motorWiggleTime = 200;               // wiggle interval (when han
 const uint16_t motorWiggleMagnitude = 4;            // wiggle magnitude (when hand is closed)
 
 // touch
-const uint16_t touchThreshhold = 600;               // how sensitive is the hand towards touch?
+const uint16_t touchThreshhold = 400;               // how sensitive is the hand towards touch?
 const uint16_t calibrationLength = 80;              // how many intervals to read for calibration?
 const uint16_t pauseLength = 500;                   // how many intervals between touch and calibration?
 const uint16_t touchLength = 20;                    // how many intervals to read for touch?
@@ -83,7 +83,7 @@ void setup()
                 touchLength);
 
   // set debug parameters and set states
-  hand.initialize(true, true, 100);
+  hand.initialize(true, false, 100);
 
   // calibrate mechanically
   hand.calibrate();
